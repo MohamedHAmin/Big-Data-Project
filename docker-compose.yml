@@ -1,0 +1,40 @@
+version: '3'
+services:
+  spark-master:
+    image: sdesilva26/spark_master:0.0.2
+    container_name: spark-master
+    networks:
+      - spark-network
+    ports:
+      - 8080:8080
+      - 7077:7077
+
+  spark-worker1:
+    depends_on:
+      - spark-master
+    image: sdesilva26/spark_worker:0.0.2
+    container_name: spark-worker1
+    networks:
+      - spark-network
+    ports:
+      - 8081:8081
+    environment:
+      - MEMORY=2G
+      - CORES=1
+
+  # spark-worker2:
+  #   depends_on:
+  #     - spark-master
+  #   image: sdesilva26/spark_worker:0.0.2
+  #   container_name: spark-worker2
+  #   networks:
+  #     - spark-network
+  #   ports:
+  #     - 8082:8081
+  #   environment:
+  #     - MEMORY=2G
+  #     - CORES=1
+
+networks:
+  spark-network:
+    driver: bridge
