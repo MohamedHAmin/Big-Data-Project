@@ -1,39 +1,82 @@
-version: '3'
+version: "3"
 services:
+
   spark-master:
-    image: sdesilva26/spark_master:0.0.2
-    container_name: spark-master
-    networks:
-      - spark-network
+    image: p7hb/docker-spark
     ports:
-      - 8080:8080
       - 7077:7077
+      - 8080:8080
+    environment:
+      SPARK_LOCAL_DIRS: /root/data    
+    volumes:
+      - spark-storage:/root/data
+      # - dataset:/dataset
+    command: ["/usr/local/spark/bin/spark-class", "org.apache.spark.deploy.master.Master", "--host", "spark-master"]
+    networks:
+      - spark-network  
 
   spark-worker1:
-    depends_on:
-      - spark-master
-    image: sdesilva26/spark_worker:0.0.2
-    container_name: spark-worker1
-    networks:
-      - spark-network
+    image: p7hb/docker-spark
     ports:
       - 8081:8081
+    volumes:
+      - spark-storage:/root/data
+      - dataset:/dataset
     environment:
-      - MEMORY=2G
-      - CORES=1
+      SPARK_WORKER_CORES: 1
+      SPARK_WORKER_MEMORY: 4g
+      SPARK_LOCAL_DIRS: /root/data
+    command: ["/usr/local/spark/bin/spark-class", "org.apache.spark.deploy.worker.Worker", "spark://spark-master:7077"]
+    networks:
+      - spark-network  
 
   # spark-worker2:
-  #   depends_on:
-  #     - spark-master
-  #   image: sdesilva26/spark_worker:0.0.2
-  #   container_name: spark-worker2
-  #   networks:
-  #     - spark-network
+  #   image: p7hb/docker-spark
   #   ports:
   #     - 8082:8081
+  #   volumes:
+  #     - spark-storage:/root/data
+  #     - dataset:/dataset
   #   environment:
-  #     - MEMORY=2G
-  #     - CORES=1
+  #     SPARK_WORKER_CORES: 1
+  #     SPARK_WORKER_MEMORY: 2g
+  #     SPARK_LOCAL_DIRS: /root/data
+  #   command: ["/usr/local/spark/bin/spark-class", "org.apache.spark.deploy.worker.Worker", "spark://spark-master:7077"]
+  #   networks:
+  #     - spark-network
+
+  # spark-worker3:
+  #   image: p7hb/docker-spark
+  #   ports:
+  #     - 8083:8081
+  #   volumes:
+  #     - spark-storage:/root/data
+  #     - dataset:/dataset
+  #   environment:
+  #     SPARK_WORKER_CORES: 1
+  #     SPARK_WORKER_MEMORY: 2g
+  #     SPARK_LOCAL_DIRS: /root/data
+  #   command: ["/usr/local/spark/bin/spark-class", "org.apache.spark.deploy.worker.Worker", "spark://spark-master:7077"]
+  #   networks:
+  #     - spark-network
+
+  client:
+    image: ouwen/tensorflow-spark
+    ports:
+      - 8888:8888
+    networks:
+      - spark-network
+    volumes:
+      - dataset:/dataset
+
+volumes:
+  spark-storage:
+  dataset:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: 'G:/Big Data/'
 
 networks:
   spark-network:
