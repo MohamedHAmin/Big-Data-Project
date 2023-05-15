@@ -23,7 +23,7 @@ services:
       - spark-storage:/root/data
       - dataset:/dataset
     environment:
-      SPARK_WORKER_CORES: 1
+      SPARK_WORKER_CORES: 8
       SPARK_WORKER_MEMORY: 4g
       SPARK_LOCAL_DIRS: /root/data
     command: ["/usr/local/spark/bin/spark-class", "org.apache.spark.deploy.worker.Worker", "spark://spark-master:7077"]
